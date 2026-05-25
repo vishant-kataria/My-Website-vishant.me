@@ -1,16 +1,8 @@
 // script.js
 
-// --- Firebase Initialization ---
-const firebaseConfig = {
-  apiKey: "AIzaSyCmp8FuNsCIvJNq1AEYP0GoG9zQhHwVwIY",
-  authDomain: "daycount-b1ab6.firebaseapp.com",
-  projectId: "daycount-b1ab6",
-  storageBucket: "daycount-b1ab6.firebasestorage.app",
-  messagingSenderId: "100512162709",
-  appId: "1:100512162709:web:2016c57f96bfaafbec8c9c",
-};
-firebase.initializeApp(firebaseConfig);
-const db = firebase.firestore();
+// --- Neon Database Configuration ---
+const NEON_URL = "https://ep-twilight-silence-aoldtn59-pooler.c-2.ap-southeast-1.aws.neon.tech/sql";
+const NEON_CONN = "postgresql://neondb_owner:npg_Efu38ChnpPbm@ep-twilight-silence-aoldtn59-pooler.c-2.ap-southeast-1.aws.neon.tech/neondb?sslmode=require&channel_binding=require";
 
 // --- Chart.js Loader ---
 function ensureChartJsLoaded(callback) {
@@ -113,36 +105,78 @@ function buildEntryMapAndFill() {
   });
 }
 
-// --- Load entries from Firestore ---
+// --- Initialize Neon DB ---
+async function initNeonDb() {
+  try {
+    await fetch(NEON_URL, {
+      method: "POST",
+      headers: {
+        "Neon-Connection-String": NEON_CONN,
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({
+        query: "CREATE TABLE IF NOT EXISTS app_state (id VARCHAR(255) PRIMARY KEY, data JSONB NOT NULL)"
+      })
+    });
+  } catch (e) {
+    console.error("Error initializing DB:", e);
+  }
+}
+
+// --- Load entries from Neon ---
 async function loadEntries() {
   try {
-    const doc = await db.collection("users").doc("default").get();
-    if (doc.exists) {
-      entries = doc.data().waterList || [];
+    const res = await fetch(NEON_URL, {
+      method: "POST",
+      headers: {
+        "Neon-Connection-String": NEON_CONN,
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({
+        query: "SELECT data FROM app_state WHERE id = 'default'"
+      })
+    });
+    const result = await res.json();
+    if (result && result.rows && result.rows.length > 0) {
+      const rowData = result.rows[0].data;
+      const parsedData = typeof rowData === "string" ? JSON.parse(rowData) : rowData;
+      entries = parsedData.waterList || [];
     } else {
       entries = [];
     }
     buildEntryMapAndFill();
     renderList();
   } catch (err) {
-    console.error("Error loading from Firestore:", err);
+    console.error("Error loading from Neon:", err);
     entries = [];
     buildEntryMapAndFill();
     renderList();
   }
 }
 
-// --- Save entries to Firestore ---
+// --- Save entries to Neon ---
 async function saveEntries() {
   try {
-    await db.collection("users").doc("default").set({ waterList: entries });
+    const dataObj = { waterList: entries };
+    const jsonStr = JSON.stringify(dataObj).replace(/'/g, "''");
+    
+    await fetch(NEON_URL, {
+      method: "POST",
+      headers: {
+        "Neon-Connection-String": NEON_CONN,
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({
+        query: `INSERT INTO app_state (id, data) VALUES ('default', '${jsonStr}') ON CONFLICT (id) DO UPDATE SET data = EXCLUDED.data`
+      })
+    });
   } catch (err) {
-    console.error("Error saving to Firestore:", err);
+    console.error("Error saving to Neon:", err);
   }
 }
 
-// Load entries on page load
-loadEntries();
+// Initialize and Load entries on page load
+initNeonDb().then(() => loadEntries());
 
 const olList = document.querySelector("ol");
 function renderList() {

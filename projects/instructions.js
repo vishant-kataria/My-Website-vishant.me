@@ -47,7 +47,7 @@ async function init() {
     ? `https://drive.usercontent.google.com/download?id=${fileId}&export=download&confirm=t`
     : rawDriveLink;
 
-  const cmd1 = `$dir='C:\\vishants_projects\\${folderName}'; New-Item -ItemType Directory -Force -Path $dir | Out-Null; curl.exe -L -o "$dir\\project.zip" "${directLink}"; Expand-Archive "$dir\\project.zip" -DestinationPath $dir -Force; Remove-Item "$dir\\project.zip"; cd $dir`;
+  const cmd1 = `$dir='C:\\vishants_projects\\${folderName}'; $tmp="$dir\\_tmp"; New-Item -ItemType Directory -Force -Path $tmp | Out-Null; curl.exe -L -o "$tmp\\project.zip" "${directLink}"; Expand-Archive "$tmp\\project.zip" -DestinationPath $tmp -Force; $inner=Get-ChildItem $tmp -Directory | Select-Object -First 1; if($inner){ Move-Item "$($inner.FullName)\\*" $dir -Force }; Remove-Item $tmp -Recurse -Force; cd $dir`;
   
   document.getElementById('cmd-1').textContent = cmd1;
   document.getElementById('cmd-2').textContent = `cd C:\\vishants_projects\\${folderName}; npm install`;

@@ -36,7 +36,7 @@ async function init() {
   const driveLink = project.drive_link || "https://drive.google.com/...";
   const folderName = project.project_path || "my-project";
   
-  const cmd1 = `Invoke-WebRequest -Uri "${driveLink}" -OutFile project.zip; Expand-Archive project.zip -DestinationPath . -Force; cd ${folderName}`;
+  const cmd1 = `$dir='C:\\Program Files\\vishants_projects'; New-Item -ItemType Directory -Force -Path $dir; Invoke-WebRequest -Uri "${driveLink}" -OutFile "$dir\\project.zip"; Expand-Archive "$dir\\project.zip" -DestinationPath $dir -Force; cd "$dir\\${folderName}"`;
   
   document.getElementById('cmd-1').textContent = cmd1;
   document.getElementById('cmd-3').textContent = project.start_cmd || "npm start";

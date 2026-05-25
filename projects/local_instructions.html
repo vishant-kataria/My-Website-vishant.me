@@ -10,83 +10,89 @@
     .instructions-container {
       background: var(--surface);
       border: 1px solid var(--border);
-      border-radius: 8px;
-      padding: 32px;
-      margin-top: 32px;
-    }
-    .instructions-container h2 {
-      margin-bottom: 8px;
-    }
-    .instructions-container p.subtitle {
-      color: var(--text-muted);
-      margin-bottom: 32px;
-      font-size: 0.95rem;
-    }
-    .step {
-      margin-bottom: 24px;
-    }
-    .step-header {
-      display: flex;
-      justify-content: space-between;
-      align-items: flex-end;
-      margin-bottom: 8px;
-    }
-    .step-title {
-      font-weight: 600;
-      font-size: 1rem;
-    }
-    .step-badge {
-      font-size: 0.75rem;
-      background: var(--surface-alt);
-      border: 1px solid var(--border-input);
-      padding: 2px 8px;
       border-radius: 12px;
-      color: var(--text-faint);
-    }
-    .cmd-box {
-      display: flex;
-      align-items: center;
-      background: var(--bg);
-      border: 1px solid var(--border);
-      border-radius: 6px;
-      overflow: hidden;
-    }
-    .cmd-text {
-      flex: 1;
-      padding: 12px 16px;
-      font-family: monospace;
-      font-size: 0.875rem;
-      color: var(--text);
-      overflow-x: auto;
-      white-space: nowrap;
-    }
-    .cmd-copy-btn {
-      background: var(--surface-alt);
-      border: none;
-      border-left: 1px solid var(--border);
-      padding: 12px 16px;
-      cursor: pointer;
-      color: var(--text-muted);
-      font-weight: 500;
-      transition: background 0.15s, color 0.15s;
-    }
-    .cmd-copy-btn:hover {
-      background: var(--border-light);
-      color: var(--text);
-    }
-    .cmd-copy-btn.copied {
-      background: var(--link);
-      color: #fff;
-    }
-    .final-action {
-      margin-top: 48px;
+      padding: 40px 32px;
+      margin-top: 32px;
       text-align: center;
     }
-    .final-action button {
-      font-size: 1rem;
-      padding: 12px 24px;
+    .instructions-container h2 {
+      margin-bottom: 6px;
+      font-size: 1.5rem;
     }
-    
+    .tagline {
+      color: var(--text-muted);
+      font-size: 1.05rem;
+      margin-bottom: 32px;
+    }
+    .fun-note {
+      color: var(--text-faint);
+      font-size: 0.85rem;
+      margin-bottom: 28px;
+      font-style: italic;
+    }
+
+    .commands-row {
+      display: flex;
+      justify-content: center;
+      gap: 16px;
+      flex-wrap: wrap;
+      margin-bottom: 36px;
+    }
+
+    .cmd-pill {
+      position: relative;
+      background: var(--surface-alt);
+      border: 1px solid var(--border-input);
+      border-radius: 10px;
+      padding: 14px 28px;
+      font-size: 0.95rem;
+      font-weight: 600;
+      cursor: pointer;
+      color: var(--text);
+      transition: all 0.2s ease;
+      user-select: none;
+    }
+    .cmd-pill:hover {
+      border-color: var(--link);
+      transform: translateY(-2px);
+      box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+    }
+    .cmd-pill:active {
+      transform: translateY(0);
+    }
+    .cmd-pill.copied {
+      background: var(--link);
+      color: #fff;
+      border-color: var(--link);
+    }
+    .cmd-pill .pill-label {
+      display: block;
+      font-size: 0.7rem;
+      font-weight: 400;
+      color: var(--text-faint);
+      margin-top: 4px;
+    }
+    .cmd-pill.copied .pill-label {
+      color: rgba(255,255,255,0.8);
+    }
+
+    .divider {
+      width: 60px;
+      height: 1px;
+      background: var(--border);
+      margin: 0 auto 28px;
+    }
+
+    .final-section p {
+      color: var(--text-muted);
+      margin-bottom: 14px;
+      font-size: 0.95rem;
+    }
+    .final-section button {
+      font-size: 1rem;
+      padding: 12px 32px;
+    }
+
     #loading {
       text-align: center;
       padding: 64px;
@@ -114,41 +120,28 @@
 
     <div id="content" class="instructions-container">
       <h2 id="proj-name">Project Name</h2>
-      <p class="subtitle">This is a local project. You must download it to run it. Run these 3 commands in your PowerShell terminal.</p>
+      <p class="tagline">🏠 This one lives on your machine — gotta earn it!</p>
+      <p class="fun-note">Just 3 clicks and a little patience. You got this 💪</p>
 
-      <div class="step">
-        <div class="step-header">
-          <span class="step-title">1. Download & Extract Code</span>
-          <span class="step-badge">One time only</span>
+      <div class="commands-row">
+        <div class="cmd-pill" id="pill-1" title="Click to copy">
+          📥 Command 1
+          <span class="pill-label">one-time download</span>
         </div>
-        <div class="cmd-box">
-          <div class="cmd-text" id="cmd-1">Loading...</div>
-          <button class="cmd-copy-btn" data-target="cmd-1">Copy</button>
+        <div class="cmd-pill" id="pill-2" title="Click to copy">
+          📦 Command 2
+          <span class="pill-label">install stuff</span>
+        </div>
+        <div class="cmd-pill" id="pill-3" title="Click to copy">
+          🚀 Command 3
+          <span class="pill-label">launch it</span>
         </div>
       </div>
 
-      <div class="step">
-        <div class="step-header">
-          <span class="step-title">2. Install Dependencies</span>
-        </div>
-        <div class="cmd-box">
-          <div class="cmd-text" id="cmd-2">Loading...</div>
-          <button class="cmd-copy-btn" data-target="cmd-2">Copy</button>
-        </div>
-      </div>
+      <div class="divider"></div>
 
-      <div class="step">
-        <div class="step-header">
-          <span class="step-title">3. Start the Project</span>
-        </div>
-        <div class="cmd-box">
-          <div class="cmd-text" id="cmd-3">Loading...</div>
-          <button class="cmd-copy-btn" data-target="cmd-3">Copy</button>
-        </div>
-      </div>
-
-      <div class="final-action">
-        <p style="margin-bottom: 12px; color: var(--text-muted);">After running all commands successfully, click below:</p>
+      <div class="final-section">
+        <p>All 3 done? Nice 🎉 Hit the button 👇</p>
         <button id="open-website-btn" class="btn-primary">Open Website</button>
       </div>
     </div>

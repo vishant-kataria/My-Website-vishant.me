@@ -48,37 +48,37 @@ async function init() {
     : rawDriveLink;
 
   const cmd1 = `$dir='C:\\vishants_projects\\${folderName}'; $tmp="$dir\\_tmp"; New-Item -ItemType Directory -Force -Path $tmp | Out-Null; curl.exe -L -o "$tmp\\project.zip" "${directLink}"; Expand-Archive "$tmp\\project.zip" -DestinationPath $tmp -Force; $inner=Get-ChildItem $tmp -Directory | Select-Object -First 1; if($inner){ Move-Item "$($inner.FullName)\\*" $dir -Force }; Remove-Item $tmp -Recurse -Force; cd $dir`;
-  
-  document.getElementById('cmd-1').textContent = cmd1;
-  document.getElementById('cmd-2').textContent = `cd C:\\vishants_projects\\${folderName}; npm install`;
-  document.getElementById('cmd-3').textContent = `cd C:\\vishants_projects\\${folderName}; ${project.start_cmd || "npm start"}`;
+  const cmd2 = `cd C:\\vishants_projects\\${folderName}; npm install`;
+  const cmd3 = `cd C:\\vishants_projects\\${folderName}; ${project.start_cmd || "npm start"}`;
 
+  // Pill click → copy
+  function setupPill(pillId, command, originalText) {
+    const pill = document.getElementById(pillId);
+    pill.addEventListener('click', () => {
+      navigator.clipboard.writeText(command).then(() => {
+        pill.innerHTML = '✅ Copied!';
+        pill.classList.add('copied');
+        setTimeout(() => {
+          pill.innerHTML = originalText;
+          pill.classList.remove('copied');
+        }, 1500);
+      });
+    });
+  }
+
+  setupPill('pill-1', cmd1, '📥 Command 1<span class="pill-label">one-time download</span>');
+  setupPill('pill-2', cmd2, '📦 Command 2<span class="pill-label">install stuff</span>');
+  setupPill('pill-3', cmd3, '🚀 Command 3<span class="pill-label">launch it</span>');
+
+  // Open website in same tab
   document.getElementById('open-website-btn').addEventListener('click', () => {
     if (project.local_url) {
-      window.open(project.local_url, '_blank', 'noopener');
+      window.location.href = project.local_url;
     } else {
       alert('No local link is set for this project.');
     }
   });
 }
-
-// Copy logic
-document.querySelectorAll('.cmd-copy-btn').forEach(btn => {
-  btn.addEventListener('click', (e) => {
-    const targetId = e.target.dataset.target;
-    const text = document.getElementById(targetId).textContent;
-    
-    navigator.clipboard.writeText(text).then(() => {
-      const original = e.target.textContent;
-      e.target.textContent = 'Copied!';
-      e.target.classList.add('copied');
-      setTimeout(() => {
-        e.target.textContent = original;
-        e.target.classList.remove('copied');
-      }, 1200);
-    });
-  });
-});
 
 // Theme toggle
 const THEME_KEY = "theme_preference";

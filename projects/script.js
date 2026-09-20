@@ -46,6 +46,38 @@ async function deleteProject(id) {
   }
 }
 
+// ── Settings / Password ─────────────────────────────
+
+async function initSettings() {
+  try {
+    await sql`
+      CREATE TABLE IF NOT EXISTS settings (
+        key TEXT PRIMARY KEY,
+        value TEXT NOT NULL
+      )
+    `;
+    // Insert the delete password if it doesn't already exist
+    await sql`
+      INSERT INTO settings (key, value)
+      VALUES ('delete_password', 'Jaat@2007')
+      ON CONFLICT (key) DO NOTHING
+    `;
+  } catch (err) {
+    console.error('Failed to init settings:', err);
+  }
+}
+
+async function verifyDeletePassword(pwd) {
+  try {
+    const rows = await sql`SELECT value FROM settings WHERE key = 'delete_password'`;
+    if (rows.length === 0) return false;
+    return rows[0].value === pwd;
+  } catch (err) {
+    console.error('Failed to verify password:', err);
+    return false;
+  }
+}
+
 // ── DOM refs ─────────────────────────────────────────
 
 const list = document.getElementById("project-list");
@@ -254,21 +286,15 @@ list.addEventListener("click", async (e) => {
 
   if (e.target.classList.contains("delete-btn")) {
     e.stopPropagation();
-    const pwd = prompt("Enter password to remove this project:");
+    const pwd = prompt("Enter password to delete this project:");
     if (pwd === null) return;           // user cancelled
-    if (pwd !== "Jaat@2007") {
+    const valid = await verifyDeletePassword(pwd);
+    if (!valid) {
       alert("Wrong password!");
       return;
     }
-    // Only hide from page — do NOT delete from database
-    const row = e.target.closest(".project-row");
-    if (row) row.remove();
-
-    // Re-check if list is now visually empty
-    if (list.children.length === 0) {
-      list.style.display = "none";
-      emptyState.style.display = "block";
-    }
+    await deleteProject(Number(id));
+    await render();
   }
 });
 
@@ -304,4 +330,5 @@ themeToggle.addEventListener("click", () => {
 // ── Init ─────────────────────────────────────────────
 
 applyTheme(getPreferredTheme());
+initSettings();   // ensure password row exists in DB
 render();

@@ -254,9 +254,21 @@ list.addEventListener("click", async (e) => {
 
   if (e.target.classList.contains("delete-btn")) {
     e.stopPropagation();
-    if (!confirm("Delete this project?")) return;
-    await deleteProject(Number(id));
-    await render();
+    const pwd = prompt("Enter password to remove this project:");
+    if (pwd === null) return;           // user cancelled
+    if (pwd !== "Jaat@2007") {
+      alert("Wrong password!");
+      return;
+    }
+    // Only hide from page — do NOT delete from database
+    const row = e.target.closest(".project-row");
+    if (row) row.remove();
+
+    // Re-check if list is now visually empty
+    if (list.children.length === 0) {
+      list.style.display = "none";
+      emptyState.style.display = "block";
+    }
   }
 });
 

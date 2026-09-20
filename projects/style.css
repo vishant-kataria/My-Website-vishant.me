@@ -386,3 +386,70 @@ main {
     margin-top: 4px;
   }
 }
+
+/* ── Password Modal ─────────────────────────────── */
+
+.pwd-modal {
+  max-width: 380px;
+  animation: pwdSlideIn 0.2s ease-out;
+}
+
+@keyframes pwdSlideIn {
+  from {
+    opacity: 0;
+    transform: translateY(-12px) scale(0.97);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+}
+
+.pwd-message {
+  font-size: 0.875rem;
+  color: var(--text-muted);
+  margin-bottom: 14px;
+}
+
+.pwd-input-wrap {
+  position: relative;
+}
+
+.pwd-input-wrap input {
+  width: 100%;
+  padding: 10px 14px;
+  border: 2px solid var(--border-input);
+  border-radius: 8px;
+  font-size: 1rem;
+  font-family: inherit;
+  color: var(--text);
+  background: var(--surface-alt);
+  letter-spacing: 2px;
+  transition: border-color 0.15s;
+}
+
+.pwd-input-wrap input:focus {
+  outline: none;
+  border-color: var(--link);
+  background: var(--surface);
+}
+
+.pwd-input-wrap input.pwd-shake {
+  animation: pwdShake 0.4s ease-in-out;
+  border-color: var(--delete-hover);
+}
+
+@keyframes pwdShake {
+  0%, 100% { transform: translateX(0); }
+  20% { transform: translateX(-8px); }
+  40% { transform: translateX(8px); }
+  60% { transform: translateX(-6px); }
+  80% { transform: translateX(6px); }
+}
+
+.pwd-error {
+  font-size: 0.8125rem;
+  color: var(--delete-hover);
+  margin-top: 8px;
+  margin-bottom: 0;
+}

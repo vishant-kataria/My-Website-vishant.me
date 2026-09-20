@@ -90,6 +90,67 @@ const addBtn = document.getElementById("add-btn");
 const cancelBtn = document.getElementById("cancel-btn");
 const modalCloseBtn = document.getElementById("modal-close");
 
+// Password modal refs
+const pwdOverlay = document.getElementById("pwd-overlay");
+const pwdInput = document.getElementById("pwd-input");
+const pwdError = document.getElementById("pwd-error");
+const pwdConfirm = document.getElementById("pwd-confirm");
+const pwdCancel = document.getElementById("pwd-cancel");
+const pwdClose = document.getElementById("pwd-close");
+const pwdMessage = document.getElementById("pwd-message");
+
+// ── Password modal helper ────────────────────────────
+
+function askPassword(message) {
+  return new Promise((resolve) => {
+    pwdMessage.textContent = message || "Enter password to continue:";
+    pwdInput.value = "";
+    pwdError.style.display = "none";
+    pwdInput.classList.remove("pwd-shake");
+    pwdOverlay.style.display = "flex";
+    setTimeout(() => pwdInput.focus(), 50);
+
+    function cleanup() {
+      pwdOverlay.style.display = "none";
+      pwdConfirm.removeEventListener("click", onConfirm);
+      pwdCancel.removeEventListener("click", onCancel);
+      pwdClose.removeEventListener("click", onCancel);
+      pwdInput.removeEventListener("keydown", onKeydown);
+    }
+
+    async function onConfirm() {
+      const pwd = pwdInput.value;
+      const valid = await verifyDeletePassword(pwd);
+      if (valid) {
+        cleanup();
+        resolve(true);
+      } else {
+        pwdError.style.display = "block";
+        pwdInput.classList.remove("pwd-shake");
+        void pwdInput.offsetWidth; // force reflow for re-trigger
+        pwdInput.classList.add("pwd-shake");
+        pwdInput.value = "";
+        pwdInput.focus();
+      }
+    }
+
+    function onCancel() {
+      cleanup();
+      resolve(false);
+    }
+
+    function onKeydown(e) {
+      if (e.key === "Enter") { e.preventDefault(); onConfirm(); }
+      if (e.key === "Escape") { e.preventDefault(); onCancel(); }
+    }
+
+    pwdConfirm.addEventListener("click", onConfirm);
+    pwdCancel.addEventListener("click", onCancel);
+    pwdClose.addEventListener("click", onCancel);
+    pwdInput.addEventListener("keydown", onKeydown);
+  });
+}
+
 const inputType = document.getElementById("input-type");
 const inputName = document.getElementById("input-name");
 const inputLocal = document.getElementById("input-local");
@@ -221,7 +282,11 @@ function closeModal() {
 
 // ── Event listeners ──────────────────────────────────
 
-addBtn.addEventListener("click", () => openModal(null));
+addBtn.addEventListener("click", async () => {
+  const ok = await askPassword("Enter password to add a project:");
+  if (!ok) return;
+  openModal(null);
+});
 cancelBtn.addEventListener("click", closeModal);
 modalCloseBtn.addEventListener("click", closeModal);
 
@@ -286,13 +351,8 @@ list.addEventListener("click", async (e) => {
 
   if (e.target.classList.contains("delete-btn")) {
     e.stopPropagation();
-    const pwd = prompt("Enter password to delete this project:");
-    if (pwd === null) return;           // user cancelled
-    const valid = await verifyDeletePassword(pwd);
-    if (!valid) {
-      alert("Wrong password!");
-      return;
-    }
+    const ok = await askPassword("Enter password to delete this project:");
+    if (!ok) return;
     await deleteProject(Number(id));
     await render();
   }
